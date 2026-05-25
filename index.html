@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Тренажёр: признание доходов</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #eef2f7 0%, #e0e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, 'Roboto', sans-serif;
+            padding: 1.5rem;
+        }
+
+        .quiz-container {
+            max-width: 780px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 1.75rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .quiz-header {
+            padding: 1rem 1.5rem 0.75rem 1.5rem;
+            border-bottom: 1px solid #cde2f5;
+            background: #fefefe;
+        }
+
+        .progress-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-counter, .score-badge {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #1e4663;
+            background: #eef4fc;
+            padding: 0.2rem 0.75rem;
+            border-radius: 30px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1a2c3e;
+            margin-top: 0.2rem;
+        }
+
+        .question-area {
+            padding: 1.2rem 1.5rem 0.8rem 1.5rem;
+        }
+
+        .question-text {
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.4;
+            color: #0b2b3f;
+            margin-bottom: 1rem;
+            border-left: 4px solid #7bb3db;
+            padding-left: 0.9rem;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+            margin-bottom: 1rem;
+        }
+
+        .option-item {
+            border: 1.5px solid #cde2f5;
+            border-radius: 1rem;
+            padding: 0.6rem 1rem;
+            background: #ffffff;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .option-item:hover {
+            background: #f6fafe;
+            border-color: #7bb3db;
+        }
+
+        .option-radio {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 1.1rem;
+            height: 1.1rem;
+            border: 1.8px solid #8bb9dd;
+            border-radius: 50%;
+            margin-top: 0.1rem;
+            background: white;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .option-radio:checked {
+            border-color: #2c7ab1;
+            background-color: #2c7ab1;
+            box-shadow: inset 0 0 0 2.5px white;
+        }
+
+        .option-text {
+            flex: 1;
+            font-weight: 500;
+            font-size: 0.88rem;
+            line-height: 1.35;
+            cursor: pointer;
+        }
+
+        .option-item.correct-highlight {
+            background-color: #e2f3e9;
+            border-color: #2b8c5e;
+        }
+        .option-item.wrong-highlight {
+            background-color: #ffe8e8;
+            border-color: #d9534f;
+        }
+
+        .actions {
+            padding: 0.25rem 1.5rem 1rem 1.5rem;
+            display: flex;
+            gap: 0.8rem;
+            justify-content: flex-end;
+        }
+
+        button {
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 0.5rem 1.4rem;
+            border-radius: 2rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.18s;
+            background: #f0f4f9;
+            color: #1f4e6e;
+        }
+
+        .btn-primary {
+            background: #2c7ab1;
+            color: white;
+            box-shadow: 0 2px 6px rgba(44,122,177,0.2);
+        }
+        .btn-primary:hover {
+            background: #1f6190;
+            transform: translateY(-1px);
+        }
+
+        .explanation-box {
+            margin: 0 1.5rem 1rem 1.5rem;
+            background: #f7fbfe;
+            border-radius: 0.9rem;
+            padding: 0.75rem 1rem;
+            border-left: 4px solid #7bb3db;
+            font-size: 0.8rem;
+            color: #1e4663;
+            line-height: 1.4;
+        }
+
+        .result-screen {
+            text-align: center;
+            padding: 1.8rem 1.5rem 2.2rem;
+        }
+
+        .result-icon {
+            font-size: 2.6rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .result-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            color: #1a2c3e;
+        }
+
+        .result-score {
+            font-size: 1rem;
+            font-weight: 600;
+            background: #eef4fc;
+            display: inline-block;
+            padding: 0.4rem 1.2rem;
+            border-radius: 40px;
+            margin-bottom: 1.5rem;
+            color: #1f6190;
+        }
+
+        @media (max-width: 550px) {
+            .quiz-container { border-radius: 1.4rem; }
+            .question-area { padding: 1rem 1.2rem 0.6rem 1.2rem; }
+            .question-text { font-size: 0.9rem; }
+            .option-item { padding: 0.5rem 0.8rem; }
+            .option-text { font-size: 0.82rem; }
+            .actions { padding: 0.2rem 1.2rem 0.8rem 1.2rem; }
+            button { padding: 0.45rem 1.2rem; }
+            h2 { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container" id="app"></div>
+
+<script>
+    const QUESTIONS = [
+        {
+            text: "1. По какой стоимости в учете вы отразите станок, который безвозмездно получили?",
+            options: [
+                "По номинальной стоимости, которую указали в договоре дарения",
+                "По справедливой стоимости имущества на дату получения",
+                "Отражу по нулевой стоимости"
+            ],
+            correctIndex: 1,
+            explanation: "Признание дохода по справедливой стоимости имущества на дату получения соответствует требованиям ФСБУ 9/2025 и общему принципу отражения безвозмездных поступлений."
+        },
+        {
+            text: "2 Как вы признаете в учете доход по неустойке, если идет судебный процесс с контрагентом?",
+            options: [
+                "Только после того, как решение вступит в силу",
+                "Сразу, как подадим иск в суд",
+                "Только после того, как деньги поступят на счет"
+            ],
+            correctIndex: 0,
+            explanation: "Доход по неустойке признавайте, только если уверены, что денежные средства к вам поступят. Если идет судебный спор и сумма еще не подтверждена, доход не признавайте."
+        },
+        {
+            text: "3 Как вы признаете доход при уступке права требования, если дебиторскую задолженность продали дороже ее балансовой стоимости?",
+            options: [
+                "Отражу только движение дебиторской задолженности без дохода",
+                "Отнесу разницу на увеличение выручки от продаж",
+                "Признаю разницу между ценой уступки и балансовой стоимостью как доход, отличный от выручки"
+            ],
+            correctIndex: 2,
+            explanation: "При уступке права требования финансовый результат определяйте как разницу между ценой продажи и балансовой стоимостью дебиторской задолженности. Если цена уступки выше, разницу признайте прочим доходом."
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let userAnswers = [];
+    let isAnswerChecked = false;
+    let selectedOption = null;
+    let explanationForCurrent = null;
+
+    const appContainer = document.getElementById('app');
+
+    function getCurrentQuestion() {
+        return QUESTIONS[currentQuestionIndex];
+    }
+
+    function getCorrectCount() {
+        let correct = 0;
+        for (let i = 0; i < userAnswers.length; i++) {
+            if (userAnswers[i] && userAnswers[i].isCorrect) correct++;
+        }
+        return correct;
+    }
+
+    function allQuestionsAnswered() {
+        return userAnswers.length === QUESTIONS.length && userAnswers.every(a => a && a.answered === true);
+    }
+
+    function showFinalResult() {
+        const correctCount = getCorrectCount();
+        const total = QUESTIONS.length;
+        const allCorrect = (correctCount === total);
+        
+        const icon = allCorrect ? '🏆✨' : '📋';
+        const title = allCorrect ? 'Молодец!' : 'Ваш результат';
+        
+        const resultHtml = `
+            <div class="quiz-header">
+                <div class="progress-area">
+                    <span class="question-counter">Итог</span>
+                    <span class="score-badge">${correctCount}/${total}</span>
+                </div>
+                <h2>Признание доходов</h2>
+            </div>
+            <div class="result-screen">
+                <div class="result-icon">${icon}</div>
+                <div class="result-title">${title}</div>
+                <div class="result-score">Правильных ответов: ${correctCount} из ${total}</div>
+                <button class="btn-primary" id="restartBtn" style="padding: 0.6rem 1.8rem;">Пройти заново</button>
+            </div>
+        `;
+        
+        appContainer.innerHTML = resultHtml;
+        const restartBtn = document.getElementById('restartBtn');
+        if (restartBtn) restartBtn.addEventListener('click', resetAndRestart);
+    }
+
+    function handleNext() {
+        const nextIdx = currentQuestionIndex + 1;
+        if (nextIdx >= QUESTIONS.length) {
+            showFinalResult();
+            return;
+        }
+        currentQuestionIndex = nextIdx;
+        isAnswerChecked = false;
+        selectedOption = null;
+        explanationForCurrent = null;
+        
+        const saved = userAnswers[currentQuestionIndex];
+        if (saved && saved.selectedIndex !== undefined) {
+            selectedOption = saved.selectedIndex;
+        }
+        render();
+    }
+
+    function handleCheck() {
+        if (isAnswerChecked) return;
+        if (selectedOption === null) {
+            alert("Пожалуйста, выберите вариант ответа.");
+            return;
+        }
+        
+        const question = getCurrentQuestion();
+        const isCorrect = (selectedOption === question.correctIndex);
+        
+        userAnswers[currentQuestionIndex] = {
+            selectedIndex: selectedOption,
+            isCorrect: isCorrect,
+            answered: true
+        };
+        
+        isAnswerChecked = true;
+        explanationForCurrent = question.explanation;
+        render();
+    }
+
+    function selectOption(optionIndex) {
+        if (isAnswerChecked) return;
+        selectedOption = optionIndex;
+        render();
+    }
+
+    function resetAndRestart() {
+        currentQuestionIndex = 0;
+        userAnswers = [];
+        isAnswerChecked = false;
+        selectedOption = null;
+        explanationForCurrent = null;
+        render();
+    }
+
+    function render() {
+        if (allQuestionsAnswered() && currentQuestionIndex >= QUESTIONS.length) {
+            showFinalResult();
+            return;
+        }
+        
+        const total = QUESTIONS.length;
+        const question = getCurrentQuestion();
+        const isCheckedMode = isAnswerChecked;
+        
+        let selectedIdx = selectedOption;
+        let highlightMap = {};
+        
+        if (isCheckedMode && userAnswers[currentQuestionIndex]) {
+            const userIdx = userAnswers[currentQuestionIndex].selectedIndex;
+            const correctIdx = question.correctIndex;
+            
+            if (userIdx === correctIdx) {
+                highlightMap[userIdx] = 'correct';
+            } else {
+                highlightMap[userIdx] = 'wrong';
+                highlightMap[correctIdx] = 'correct';
+            }
+        }
+        
+        let optionsHtml = '';
+        question.options.forEach((opt, idx) => {
+            let additionalClass = '';
+            if (highlightMap[idx] === 'correct') additionalClass = 'correct-highlight';
+            if (highlightMap[idx] === 'wrong') additionalClass = 'wrong-highlight';
+            
+            const isChecked = (selectedIdx === idx);
+            const disabledAttr = isCheckedMode ? 'disabled' : '';
+            
+            optionsHtml += `
+                <div class="option-item ${additionalClass}" data-opt-index="${idx}">
+                    <input type="radio" name="questionOption" class="option-radio" value="${idx}" id="opt_${idx}" ${isChecked ? 'checked' : ''} ${disabledAttr}>
+                    <label for="opt_${idx}" class="option-text">${escapeHtml(opt)}</label>
+                </div>
+            `;
+        });
+        
+        let explanationBlock = '';
+        if (isCheckedMode && explanationForCurrent) {
+            explanationBlock = `
+                <div class="explanation-box">
+                    <strong>📖 Пояснение</strong><br>
+                    ${escapeHtml(explanationForCurrent)}
+                </div>
+            `;
+        }
+        
+        const answeredCount = userAnswers.filter(a => a && a.answered === true).length;
+        
+        let actionButtons = '';
+        if (isCheckedMode) {
+            actionButtons = `
+                <div class="actions">
+                    <button class="btn-primary" id="nextBtn">Далее →</button>
+                </div>
+            `;
+        } else {
+            actionButtons = `
+                <div class="actions">
+                    <button class="btn-primary" id="checkBtn">✓ Проверить</button>
+                </div>
+            `;
+        }
+        
+        const headerHtml = `
+            <div class="quiz-header">
+                <div class="progress-area">
+                    <span class="question-counter">Вопрос ${currentQuestionIndex + 1} из ${total}</span>
+                    <span class="score-badge">✅ ${answeredCount}/${total} отвечено</span>
+                </div>
+                <h2>Признание доходов</h2>
+            </div>
+            <div class="question-area">
+                <div class="question-text">${escapeHtml(question.text)}</div>
+                <div class="options-list" id="optionsContainer">
+                    ${optionsHtml}
+                </div>
+            </div>
+            ${explanationBlock}
+            ${actionButtons}
+        `;
+        
+        appContainer.innerHTML = headerHtml;
+        
+        const optionDivs = document.querySelectorAll('.option-item');
+        optionDivs.forEach(div => {
+            const input = div.querySelector('.option-radio');
+            if (input && !input.disabled) {
+                div.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') return;
+                    const idxAttr = div.getAttribute('data-opt-index');
+                    if (idxAttr !== null && !isAnswerChecked) {
+                        selectOption(parseInt(idxAttr, 10));
+                    }
+                });
+            }
+        });
+        
+        const inputs = document.querySelectorAll('.option-radio');
+        inputs.forEach(input => {
+            input.addEventListener('change', (e) => {
+                if (!isAnswerChecked) {
+                    selectOption(parseInt(e.target.value, 10));
+                }
+            });
+        });
+        
+        const checkBtn = document.getElementById('checkBtn');
+        if (checkBtn) checkBtn.addEventListener('click', handleCheck);
+        
+        const nextBtn = document.getElementById('nextBtn');
+        if (nextBtn) nextBtn.addEventListener('click', handleNext);
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    render();
+</script>
+</body>
+</html>
